@@ -1,0 +1,99 @@
+# Nombre asignado al workflow
+name: CI - Workflow
+# Se ejecutará el workflow cuando se realice un push
+on: [push]
+
+env:
+  # Nombre de la imagen docker que será construida por defecto a 
+  # partir del nombre del repositorio
+  DOCKER_IMAGE_NAME: ${{ github.event.repository.name }}
+  # Tag para imagen de test
+  TEST_TAG: smartfenix/${{ github.event.repository.name }}:test
+  
+
+jobs:
+  build:
+    # Se ejecutaŕa en el so linux
+    runs-on: ubuntu-latest
+    # Ejecutaremos los test para la versiones especificadas
+    strategy:
+      matrix:
+        #Especificamos las versiones de node
+        node-version: [14.x]
+    steps:
+      # Es necesario clonar el código del repositorio para ejecutar
+      # los test y al usar integración continua, por lo que debemos de
+      # incluir la acción standar checkout antes que otras acciones.
+      - name: Checkout
+        uses: actions/checkout@v2
+
+      # Adapt and uncomment this steps to run CI workflow correctly
+      # # Establecemos las versiones indicadas en matrix
+      # - name: Use Node.js ${{ matrix.node-version }}
+      #   uses: actions/setup-node@v2
+      #   with:
+      #     node-version: ${{ matrix.node-version }}
+      #     cache: 'npm'
+
+      # # Install node dependencies only if not hit cache
+      # - name: Install Dependencies
+      #   run: |
+      #     npm ci
+
+      # # Build angular project
+      # - name: Build
+      #   run: |
+      #     npm build
+
+      # #Ejecutamos los test definidos
+      # - name: Test
+      #   run: |
+      #     npm test
+
+      # # Subir reportes de cobertura de tests a codecov
+      # - name: "Upload coverage to Codecov"
+      #   uses: codecov/codecov-action@v2
+      #   with:
+      #     token: ${{ secrets.CODECOV_TOKEN }} # not required for public repos
+      #     files: ./main/coverage.xml
+      #     flags: unittests # optional
+      #     fail_ci_if_error: true # optional (default = false)
+      #     verbose: true # optional (default = false)
+
+
+      # # QEMU action can be useful if you want to add emulation support 
+      # # with QEMU to be able to build against more platforms.
+      # - name: Set up QEMU
+      #   uses: docker/setup-qemu-action@v1
+      # # action will create and boot a builder using by default 
+      # # the docker-container builder driver. This is not required 
+      # # but recommended using it to be able to build multi-platform 
+      # # images, export cache, etc.
+      # - name: Set up Docker Buildx
+      #   uses: docker/setup-buildx-action@v1
+      # # Optimize build with cache
+      # - name: Cache Docker layers
+      #   uses: actions/cache@v2
+      #   with:
+      #     path: /tmp/.buildx-cache
+      #     key: ${{ runner.os }}-buildx-${{ github.sha }}
+      #     restore-keys: |
+      #       ${{ runner.os }}-buildx-
+      # # Login to container registry
+      # - name: Login to DockerHub
+      #   uses: docker/login-action@v1
+      #   with:
+      #     username: ${{ secrets.DOCKERHUB_USERNAME }}
+      #     password: ${{ secrets.DOCKERHUB_TOKEN }}
+      # # uncomment platform line and set desired platforms.
+      # - name: Build and Push to Docker Registry
+      #   uses: docker/build-push-action@v2
+      #   with:
+      #     context: ./
+      #     # platforms: linux/amd64,linux/arm64
+      #     file: ./Dockerfile
+      #     builder: ${{ steps.buildx.outputs.name }}
+      #     push: true
+      #     cache-from: type=local,src=/tmp/.buildx-cache
+      #     cache-to: type=local,dest=/tmp/.buildx-cache
+      #     tags: ${{ secrets.DOCKERHUB_USERNAME }}/${{ env.DOCKER_IMAGE_NAME }}:latest_ci, ${{ secrets.DOCKERHUB_USERNAME }}/${{ env.DOCKER_IMAGE_NAME }}:${{ github.sha }}
